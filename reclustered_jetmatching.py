@@ -1,3 +1,5 @@
+import fastjet as fj
+import vector
 import sys
 import uproot
 import awkward as ak 
@@ -19,6 +21,8 @@ def deltaPhi(phi1, phi2):
 mode = sys.argv[1] #dq or isr
 mass = sys.argv[2] #in GeV
 ptcut = int(sys.argv[3]) # in GeV
+jet_radius = float(sys.argv[4])
+jet_type = "AK" + str(int(10*jet_radius))
 jet = [1,2,3]
 rinv = [0.7, 0.5, 0.3]
 data = []
@@ -28,14 +32,31 @@ for r in rinv:
     #open root files
     events = uproot.open("/ceph/mgais/SVJ_std2_UL2018_scouting_truth_study_with_isr_NEW/SVJ_mMed-%sGeV_mDark-20GeV_rinv-%s_alpha-peak_13TeV/SVJ_mMed-%s_mDark-20_rinv-%s_alpha-peak.root"%(mass,r,mass,r))['mmtree/Events']
 
-    #ensure at least 2 Fatjets, add pt and eta cuts
-    preselection = (events['FatJet_pt'].array() > ptcut) & (abs(events['FatJet_eta'].array()) < 2.4)
-    nFatJet = (ak.count(events['FatJet_pt'].array()[preselection], axis=1) >= 2) & (events['scouting_trig'].array() == 1)
-    jet_pt = events['FatJet_pt'].array()[preselection][nFatJet]
-    print("jet_pt: ",jet_pt)
-    jet_eta = events['FatJet_eta'].array()[preselection][nFatJet]
-    print("jet_eta: ",jet_eta)
-    jet_phi = events['FatJet_phi'].array()[preselection][nFatJet]    
+
+    vector.register_awkward()
+    PFcands = ak.zip({
+        "pt": events['PFCands_pt'].array(),
+        "eta": events['PFCands_eta'].array(),
+        "phi": events['PFCands_phi'].array(),
+        "mass": events['PFCands_mass'].array(),
+    }, with_name="Momentum4D")
+
+    jetdef = fj.JetDefinition(fj.antikt_algorithm, jet_radius)
+    cluster = fj.ClusterSequence(PFcands, jetdef)
+    jets = cluster.inclusive_jets(ptcut)
+
+    sorted_indices = ak.argsort(jets.pt, ascending=False)
+    jets = jets[sorted_indices]
+    print(jets)
+    print(jets.pt)
+    print(jets.eta)
+        
+    preselection = abs(jets.eta) < 2.4
+    nFatJet = (ak.count(jets.pt[preselection], axis=1) >= 2) & (events['scouting_trig'].array() == 1)
+
+    jet_pt = jets.pt[preselection][nFatJet]
+    jet_eta = jets.eta[preselection][nFatJet]
+    jet_phi = jets.phi[preselection][nFatJet]
 
     #to match dark quarks
     if mode == 'dq':
@@ -107,7 +128,7 @@ ax.set_xticklabels(jet)
 ax.set_yticklabels(rinv)
 ax.tick_params(which='minor',bottom = False,left=False,right=False,top=False)
 ax.tick_params(which='major',right=False,top=False,left=False,bottom=False)
-ax.set_xlabel("AK8 jet number")
+ax.set_xlabel(f"{jet_type} jet number")
 ax.set_ylabel(r"$r_\mathrm{inv}$")
 
 # Create colorbar
@@ -128,8 +149,8 @@ fig.tight_layout()
 
 hep.cms.text("Simulation Private Work", fontsize=17, ax=ax)
 if mode == "dq":
-    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/AK8/{mode}_{mass}_matching_pt{ptcut}.png',bbox_inches='tight',dpi=300)
-    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/AK8/{mode}_{mass}_matching_pt{ptcut}.pdf',bbox_inches='tight')
+    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}/{mode}_{mass}_{jet_type}_matching_pt{ptcut}.png',bbox_inches='tight',dpi=300)
+    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}/{mode}_{mass}_{jet_type}_matching_pt{ptcut}.pdf',bbox_inches='tight')
 if mode == "isr":
-    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/AK8_ISR/{mode}_{mass}_matching_pt{ptcut}.png',bbox_inches='tight',dpi=300)
-    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/AK8_ISR/{mode}_{mass}_matching_pt{ptcut}.pdf',bbox_inches='tight')
+    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}/{mode}_{mass}_{jet_type}_matching_pt{ptcut}.png',bbox_inches='tight',dpi=300)
+    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}/{mode}_{mass}_{jet_type}_matching_pt{ptcut}.pdf',bbox_inches='tight')

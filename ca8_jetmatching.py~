@@ -1,3 +1,5 @@
+import fastjet as fj
+import vector
 import sys
 import uproot
 import awkward as ak 
@@ -24,18 +26,38 @@ rinv = [0.7, 0.5, 0.3]
 data = []
 
 
+#fig,ax = plt.subplots(figsize=(7,6))
+#bins = np.linspace(-4,4,30)
+
 for r in rinv:
     #open root files
     events = uproot.open("/ceph/mgais/SVJ_std2_UL2018_scouting_truth_study_with_isr_NEW/SVJ_mMed-%sGeV_mDark-20GeV_rinv-%s_alpha-peak_13TeV/SVJ_mMed-%s_mDark-20_rinv-%s_alpha-peak.root"%(mass,r,mass,r))['mmtree/Events']
 
-    #ensure at least 2 Fatjets, add pt and eta cuts
-    preselection = (events['FatJet_pt'].array() > ptcut) & (abs(events['FatJet_eta'].array()) < 2.4)
-    nFatJet = (ak.count(events['FatJet_pt'].array()[preselection], axis=1) >= 2) & (events['scouting_trig'].array() == 1)
-    jet_pt = events['FatJet_pt'].array()[preselection][nFatJet]
-    print("jet_pt: ",jet_pt)
-    jet_eta = events['FatJet_eta'].array()[preselection][nFatJet]
-    print("jet_eta: ",jet_eta)
-    jet_phi = events['FatJet_phi'].array()[preselection][nFatJet]    
+
+    vector.register_awkward()
+    PFcands = ak.zip({
+        "pt": events['PFCands_pt'].array(),
+        "eta": events['PFCands_eta'].array(),
+        "phi": events['PFCands_phi'].array(),
+        "mass": events['PFCands_mass'].array(),
+    }, with_name="Momentum4D")
+
+    jetdef = fj.JetDefinition(fj.cambridge_algorithm, 0.8)
+    cluster = fj.ClusterSequence(PFcands, jetdef)
+    ca8 = cluster.inclusive_jets(ptcut)
+
+    sorted_indices = ak.argsort(ca8.pt, ascending=False)
+    ca8 = ca8[sorted_indices]
+    print(ca8)
+    print(ca8.pt)
+    print(ca8.eta)
+        
+    preselection = abs(ca8.eta) < 2.4
+    nFatJet = (ak.count(ca8.pt[preselection], axis=1) >= 2) & (events['scouting_trig'].array() == 1)
+
+    jet_pt = ca8.pt[preselection][nFatJet]
+    jet_eta = ca8.eta[preselection][nFatJet]
+    jet_phi = ca8.phi[preselection][nFatJet]
 
     #to match dark quarks
     if mode == 'dq':
@@ -56,6 +78,8 @@ for r in rinv:
     none_matched = 0
     matched_list = []
     print("signal efficiency: ", len(jet_pt)/len(events['run'].array()))
+    unmatched_pt = []
+    unmatched_eta = []
 
     for n in range(len(jet_pt)):
         matched = 0
@@ -107,7 +131,7 @@ ax.set_xticklabels(jet)
 ax.set_yticklabels(rinv)
 ax.tick_params(which='minor',bottom = False,left=False,right=False,top=False)
 ax.tick_params(which='major',right=False,top=False,left=False,bottom=False)
-ax.set_xlabel("AK8 jet number")
+ax.set_xlabel("CA8 jet number")
 ax.set_ylabel(r"$r_\mathrm{inv}$")
 
 # Create colorbar
@@ -128,8 +152,8 @@ fig.tight_layout()
 
 hep.cms.text("Simulation Private Work", fontsize=17, ax=ax)
 if mode == "dq":
-    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/AK8/{mode}_{mass}_matching_pt{ptcut}.png',bbox_inches='tight',dpi=300)
-    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/AK8/{mode}_{mass}_matching_pt{ptcut}.pdf',bbox_inches='tight')
+    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/CA8/{mode}_{mass}_ca8_matching_pt{ptcut}.png',bbox_inches='tight',dpi=300)
+    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/CA8/{mode}_{mass}_ca8_matching_pt{ptcut}.pdf',bbox_inches='tight')
 if mode == "isr":
-    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/AK8_ISR/{mode}_{mass}_matching_pt{ptcut}.png',bbox_inches='tight',dpi=300)
-    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/AK8_ISR/{mode}_{mass}_matching_pt{ptcut}.pdf',bbox_inches='tight')
+    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/CA8/{mode}_{mass}_ca8_matching_pt{ptcut}.png',bbox_inches='tight',dpi=300)
+    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/CA8/{mode}_{mass}_ca8_matching_pt{ptcut}.pdf',bbox_inches='tight')
