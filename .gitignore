@@ -1,6 +1,6 @@
 __init__.py
 *.pyc
-*.py~
+*~
 *.root
 *.root.dot
 *.pdf
