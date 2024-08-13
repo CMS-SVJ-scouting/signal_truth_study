@@ -65,6 +65,10 @@ dq_pt = events['MatrixElementGenParticle_pt'].array()[nFatJet][pt_cut]
 dq_eta = events['MatrixElementGenParticle_eta'].array()[nFatJet][pt_cut]
 dq_phi = events['MatrixElementGenParticle_phi'].array()[nFatJet][pt_cut]
 
+isr_pt = events['ISRGluonGenParticle_pt'].array()[nFatJet][pt_cut]
+isr_eta = events['ISRGluonGenParticle_eta'].array()[nFatJet][pt_cut]
+isr_phi = events['ISRGluonGenParticle_phi'].array()[nFatJet][pt_cut]
+
 print("signal efficiency: ", len(jet_pt)/len(events['run'].array()))
 for n in range(100):
     matched = 0
@@ -81,12 +85,16 @@ for n in range(100):
         # draw all PF candidates in grey
         plt.scatter(pfcand_eta[n], pfcand_phi[n], marker='.', s=sizes, label=f"PF candidates", color="grey")
         # then redraw those that are jet constituents in color
+        print("event: ", n)
+        print("DQ: ", dq_eta[n], dq_phi[n])
+        print("ISR: ", isr_eta[n], isr_phi[n])
         for njet in range(len(jet_pt[n])):
-            print(const_eta[n,njet], const_phi[n,njet])
+            print("constituents: ", const_eta[n,njet], const_phi[n,njet])
             sizes=const_pt[n,njet] * 10
             plt.scatter(const_eta[n,njet], const_phi[n,njet], marker='.', s=sizes, label=f"Jet {njet+1}")
         # draw the dark quarks
         plt.scatter(dq_eta[n], dq_phi[n], marker='x', label=f"dark quark", color="red")
+        plt.scatter(isr_eta[n], isr_phi[n], marker='x', label=f"ISR gluon", color="green")
         plt.xlim(-2.4,2.4)
         plt.ylim(-3.14,3.14)
         plt.xlabel(r"$\eta$")
@@ -94,6 +102,6 @@ for n in range(100):
         hep.cms.text("Simulation Private Work", fontsize=15)
         plt.title(r"m$_{\mathrm{Z'}}$ = $%s\,$GeV, $r_\mathrm{inv}=%s$"%(mass,rinv), fontsize=12, loc='right')
         plt.legend(loc=1, frameon=True)
-        fig.savefig(f'/web/mgais/public_html/scouting_truth_study/pfcand_eta_phi/eta_phi_mZ-{mass}_rinv-{rinv}_ptcut-{ptcut}_event-{n}.png',bbox_inches='tight',dpi=300)
-        fig.savefig(f'/web/mgais/public_html/scouting_truth_study/pfcand_eta_phi/eta_phi_mZ-{mass}_rinv-{rinv}_ptcut-{ptcut}_event-{n}.pdf',bbox_inches='tight')
+        fig.savefig(f'/web/mgais/public_html/scouting_truth_study/pfcand_eta_phi_with_ISR/eta_phi_mZ-{mass}_rinv-{rinv}_ptcut-{ptcut}_event-{n}.png',bbox_inches='tight',dpi=300)
+        fig.savefig(f'/web/mgais/public_html/scouting_truth_study/pfcand_eta_phi_with_ISR/eta_phi_mZ-{mass}_rinv-{rinv}_ptcut-{ptcut}_event-{n}.pdf',bbox_inches='tight')
         plt.close()

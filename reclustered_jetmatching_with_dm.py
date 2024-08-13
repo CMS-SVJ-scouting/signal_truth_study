@@ -56,7 +56,7 @@ for r in rinv:
     print(jets.eta)
         
     preselection = abs(jets.eta) < 2.4
-    nFatJet = (ak.count(jets.pt[preselection], axis=1) >= 2) & (events['scouting_trig'].array() == 1)
+    nFatJet = (ak.count(jets.pt[preselection], axis=1) >= 2) #& (events['scouting_trig'].array() == 1)
 
     #to match dark quarks
     if mode == 'dq':
@@ -156,8 +156,8 @@ fig.tight_layout()
 
 hep.cms.text("Simulation Private Work", fontsize=17, ax=ax)
 if mode == "dq":
-    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}_with_DM/{mode}_{mass}_{jet_type}_matching_pt{ptcut}_dq_cut.png',bbox_inches='tight',dpi=300)
-    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}_with_DM/{mode}_{mass}_{jet_type}_matching_pt{ptcut}_dq_cut.pdf',bbox_inches='tight')
+    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}_with_DM/{mode}_{mass}_{jet_type}_matching_pt{ptcut}_no_trig.png',bbox_inches='tight',dpi=300)
+    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}_with_DM/{mode}_{mass}_{jet_type}_matching_pt{ptcut}_no_trig.pdf',bbox_inches='tight')
 if mode == "isr":
     fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}_with_DM/{mode}_{mass}_{jet_type}_matching_pt{ptcut}_dq_cut.png',bbox_inches='tight',dpi=300)
     fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}_with_DM/{mode}_{mass}_{jet_type}_matching_pt{ptcut}_dq_cut.pdf',bbox_inches='tight')
