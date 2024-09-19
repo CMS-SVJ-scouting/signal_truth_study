@@ -78,7 +78,7 @@ for n in range(100):
             if dR <= 0.8:
                 matched += 1
                 break
-                
+
     if matched < 2:
         fig,ax = plt.subplots(figsize=(7,6))
         sizes = pfcand_pt[n] * 10
@@ -105,3 +105,4 @@ for n in range(100):
         fig.savefig(f'/web/mgais/public_html/scouting_truth_study/pfcand_eta_phi_with_ISR/eta_phi_mZ-{mass}_rinv-{rinv}_ptcut-{ptcut}_event-{n}.png',bbox_inches='tight',dpi=300)
         fig.savefig(f'/web/mgais/public_html/scouting_truth_study/pfcand_eta_phi_with_ISR/eta_phi_mZ-{mass}_rinv-{rinv}_ptcut-{ptcut}_event-{n}.pdf',bbox_inches='tight')
         plt.close()
+

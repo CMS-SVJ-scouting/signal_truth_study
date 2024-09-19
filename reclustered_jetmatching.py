@@ -53,16 +53,17 @@ for r in rinv:
         
     preselection = abs(jets.eta) < 2.4
     nFatJet = (ak.count(jets.pt[preselection], axis=1) >= 2) & (events['scouting_trig'].array() == 1)
+    #pt150 = (jets.pt[preselection][nFatJet][:,1] >= 150)
 
-    jet_pt = jets.pt[preselection][nFatJet]
-    jet_eta = jets.eta[preselection][nFatJet]
-    jet_phi = jets.phi[preselection][nFatJet]
+    jet_pt = jets.pt[preselection][nFatJet]#[pt150]
+    jet_eta = jets.eta[preselection][nFatJet]#[pt150]
+    jet_phi = jets.phi[preselection][nFatJet]#[pt150]
 
     #to match dark quarks
     if mode == 'dq':
-        dq_pt = events['MatrixElementGenParticle_pt'].array()[nFatJet]
-        dq_eta = events['MatrixElementGenParticle_eta'].array()[nFatJet]
-        dq_phi = events['MatrixElementGenParticle_phi'].array()[nFatJet]
+        dq_pt = events['MatrixElementGenParticle_pt'].array()[nFatJet]#[pt150]
+        dq_eta = events['MatrixElementGenParticle_eta'].array()[nFatJet]#[pt150]
+        dq_phi = events['MatrixElementGenParticle_phi'].array()[nFatJet]#[pt150]
 
     #to match ISR 
     if mode == 'isr':
@@ -83,7 +84,7 @@ for r in rinv:
         for ndark in range(len(dq_eta[n])):
             for njet in range(len(jet_pt[n])):
                 dR = np.sqrt(abs(dq_eta[n,ndark]-jet_eta[n,njet])**2 + deltaPhi(dq_phi[n,ndark],jet_phi[n,njet])**2)
-                if dR <= 0.8:
+                if dR <= jet_radius:
                     try:
                         hist[njet] += 1
                     except:

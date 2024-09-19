@@ -90,7 +90,7 @@ for r in rinv:
         for ndark in range(len(dq_eta[n])):
             for njet in range(len(jet_pt[n])):
                 dR = np.sqrt(abs(dq_eta[n,ndark]-jet_eta[n,njet])**2 + deltaPhi(dq_phi[n,ndark],jet_phi[n,njet])**2)
-                if dR <= 0.8:
+                if dR <= jet_radius:
                     try:
                         hist[njet] += 1
                     except:
@@ -156,8 +156,8 @@ fig.tight_layout()
 
 hep.cms.text("Simulation Private Work", fontsize=17, ax=ax)
 if mode == "dq":
-    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}_with_DM/{mode}_{mass}_{jet_type}_matching_pt{ptcut}_no_trig.png',bbox_inches='tight',dpi=300)
-    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}_with_DM/{mode}_{mass}_{jet_type}_matching_pt{ptcut}_no_trig.pdf',bbox_inches='tight')
+    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}_with_DM/{mode}_{mass}_{jet_type}_matching_pt{ptcut}_without_trigger_with_dq_eta.png',bbox_inches='tight',dpi=300)
+    fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}_with_DM/{mode}_{mass}_{jet_type}_matching_pt{ptcut}_without_trigger_with_dq_eta.pdf',bbox_inches='tight')
 if mode == "isr":
     fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}_with_DM/{mode}_{mass}_{jet_type}_matching_pt{ptcut}_dq_cut.png',bbox_inches='tight',dpi=300)
     fig.savefig(f'/web/mgais/public_html/scouting_truth_study/{jet_type}_with_DM/{mode}_{mass}_{jet_type}_matching_pt{ptcut}_dq_cut.pdf',bbox_inches='tight')
